@@ -14,12 +14,20 @@ struct Process{
 
     Process(){
         pid = id++;
+        arrivalTime = 0;
+        burstTime = 0;
+        waitingTime = 0;
+        completionTime = 0;
+        turnAroundTime = 0;
     }
 
     Process(int at, int bt){
         pid = id++;
         arrivalTime = at;
         burstTime = bt;
+        waitingTime = 0;
+        completionTime = 0;
+        turnAroundTime = 0;
     }
 
     void showPocess(){
@@ -53,11 +61,11 @@ void fcfs(vector<Process>& pList){
 
 struct compareBurstTime{
     bool operator()(Process &p1, Process &p2){
-        return (p1.burstTime<p2.burstTime || (p1.burstTime==p2.burstTime && p1.pid<p2.pid));
+        return (p1.burstTime>p2.burstTime || (p1.burstTime==p2.burstTime && p1.pid<p2.pid));
     }
 };
 
-void sjf(vector<Process>& pList){
+void sjfNP(vector<Process>& pList){
 
     sort(pList.begin(), pList.end(), [](Process &p1, Process &p2){
         return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid<p2.pid));
@@ -90,6 +98,46 @@ void sjf(vector<Process>& pList){
 
 }
 
+void sjfP(vector<Process>& pList){
+
+    sort(pList.begin(), pList.end(), [](Process &p1, Process &p2){
+        return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid<p2.pid));
+    });
+
+    priority_queue<Process, vector<Process>, compareBurstTime> minHeap;
+
+    int currTime = pList[0].arrivalTime;
+    vector<Process> schedule;
+    minHeap.push(pList[0]);
+    int ind = 1;
+    int n = pList.size();
+
+    while(!minHeap.empty()){
+        currTime++;
+
+        Process p = minHeap.top();
+        minHeap.pop();
+        p.burstTime--;
+        p.turnAroundTime--;
+
+        if(p.burstTime > 0) minHeap.push(p);
+        else{
+            p.completionTime = currTime;
+            p.turnAroundTime = p.completionTime-p.arrivalTime;
+            p.waitingTime += p.turnAroundTime;
+            schedule.push_back(p);
+        }
+        
+
+        while(ind<n && pList[ind].arrivalTime <= currTime){
+            minHeap.push(pList[ind++]);
+        }
+    }
+
+    pList = schedule;
+
+}
+
 int main(){
 
     int n;
@@ -104,7 +152,9 @@ int main(){
         processes.push_back(p);
     }
 
-    fcfs(processes);
+    // fcfs(processes);
+    // sjfNP(processes);
+    // sjfP(processes);
 
     for(Process p : processes) p.showPocess();
     
