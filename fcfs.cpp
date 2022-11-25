@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int id = 0;
+int id = 1;
 
 struct Process{
     int pid;
@@ -146,7 +146,9 @@ void rr(vector<Process>& pList, int tq){
     queue<Process> q;
     vector<Process> schedule;
 
-    for(Process p : pList) q.push(p);
+    int ind = 0;
+    int n = pList.size();
+    q.push(pList[ind++]);
 
     int currTime = q.front().arrivalTime;
     while(!q.empty()){
@@ -161,6 +163,10 @@ void rr(vector<Process>& pList, int tq){
             currTime+=currProcess.burstTime;
             currProcess.waitingTime-=currProcess.burstTime;
             currProcess.burstTime = 0;
+        }
+
+        while(ind<n && pList[ind].arrivalTime <= currTime){
+            q.push(pList[ind++]);
         }
 
         if(currProcess.burstTime != 0){
