@@ -182,6 +182,47 @@ void rr(vector<Process>& pList, int tq){
     pList = schedule;
 }
 
+void levelRR(
+    vector<Process>& pList,
+    int n,
+    int& ind, 
+    int& currTime, 
+    int tq, 
+    queue<Process>& currQueue, 
+    queue<Process>& nextLevelQ, 
+    queue<Process>& level1Q,
+    vector<Process>& schedule
+){
+
+    Process currProcess = currQueue.front();
+    currQueue.pop();
+    currTime = max(currTime, currProcess.arrivalTime);
+
+    if(tq <= currProcess.burstTime){
+        currProcess.burstTime-=tq;
+        currTime+=tq;
+        currProcess.waitingTime-=tq;
+    }else{
+        currTime+=currProcess.burstTime;
+        currProcess.waitingTime-=currProcess.burstTime;
+        currProcess.burstTime = 0;
+    }
+
+    while(ind<n && pList[ind].arrivalTime <= currTime){
+        level1Q.push(pList[ind++]);
+    }
+
+    if(currProcess.burstTime == 0){
+        currProcess.completionTime = currTime;
+        currProcess.turnAroundTime = currProcess.completionTime-currProcess.arrivalTime;
+        currProcess.waitingTime += currProcess.turnAroundTime;
+        schedule.push_back(currProcess);
+    }else{
+        nextLevelQ.push(currProcess);
+    }
+
+}
+
 void mlfq(vector<Process>& pList){
     sort(pList.begin(), pList.end(), [](Process &p1, Process &p2){
         return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid<p2.pid));
@@ -189,7 +230,7 @@ void mlfq(vector<Process>& pList){
 
     vector<Process> schedule;
 
-    queue<Process> level1Q; //tq = 2
+    queue<Process> level1Q; 
     queue<Process> level2Q;
     queue<Process> level3Q;
     queue<Process> level4Q;
@@ -199,92 +240,17 @@ void mlfq(vector<Process>& pList){
     int currTime = 0;
     level1Q.push(pList[0]);
     while(!level1Q.empty() || !level2Q.empty() || !level3Q.empty() || !level4Q.empty()){
-        
-        int tq1 = 2;
+
         while(!level1Q.empty()){
-            Process currProcess = level1Q.front();
-            level1Q.pop();
-            currTime = max(currTime, currProcess.arrivalTime);
-            if(tq1 <= currProcess.burstTime){
-                currProcess.burstTime-=tq1;
-                currTime+=tq1;
-                currProcess.waitingTime-=tq1;
-            }else{
-                currTime+=currProcess.burstTime;
-                currProcess.waitingTime-=currProcess.burstTime;
-                currProcess.burstTime = 0;
-            }
-
-            while(ind<n && pList[ind].arrivalTime <= currTime){
-                level1Q.push(pList[ind++]);
-            }
-
-            if(currProcess.burstTime == 0){
-                currProcess.completionTime = currTime;
-                currProcess.turnAroundTime = currProcess.completionTime-currProcess.arrivalTime;
-                currProcess.waitingTime += currProcess.turnAroundTime;
-                schedule.push_back(currProcess);
-            }else{
-                level2Q.push(currProcess);
-            }
+            levelRR(pList, n, ind, currTime, 3, level1Q, level2Q, level1Q, schedule);
         }
 
-        int tq2 = 5;
         while(!level2Q.empty() && level1Q.empty()){
-            Process currProcess = level2Q.front();
-            level2Q.pop();
-            currTime = max(currTime, currProcess.arrivalTime);
-            if(tq2 <= currProcess.burstTime){
-                currProcess.burstTime-=tq2;
-                currTime+=tq2;
-                currProcess.waitingTime-=tq2;
-            }else{
-                currTime+=currProcess.burstTime;
-                currProcess.waitingTime-=currProcess.burstTime;
-                currProcess.burstTime = 0;
-            }
-
-            while(ind<n && pList[ind].arrivalTime <= currTime){
-                level1Q.push(pList[ind++]);
-            }
-
-            if(currProcess.burstTime == 0){
-                currProcess.completionTime = currTime;
-                currProcess.turnAroundTime = currProcess.completionTime-currProcess.arrivalTime;
-                currProcess.waitingTime += currProcess.turnAroundTime;
-                schedule.push_back(currProcess);
-            }else{
-                level3Q.push(currProcess);
-            }
+            levelRR(pList, n, ind, currTime, 5, level2Q, level3Q, level1Q, schedule);
         }
 
-        int tq3 = 10;
         while(!level3Q.empty() && level2Q.empty() && level1Q.empty()){
-            Process currProcess = level3Q.front();
-            level3Q.pop();
-            currTime = max(currTime, currProcess.arrivalTime);
-            if(tq3 <= currProcess.burstTime){
-                currProcess.burstTime-=tq3;
-                currTime+=tq3;
-                currProcess.waitingTime-=tq3;
-            }else{
-                currTime+=currProcess.burstTime;
-                currProcess.waitingTime-=currProcess.burstTime;
-                currProcess.burstTime = 0;
-            }
-
-            while(ind<n && pList[ind].arrivalTime <= currTime){
-                level1Q.push(pList[ind++]);
-            }
-
-            if(currProcess.burstTime == 0){
-                currProcess.completionTime = currTime;
-                currProcess.turnAroundTime = currProcess.completionTime-currProcess.arrivalTime;
-                currProcess.waitingTime += currProcess.turnAroundTime;
-                schedule.push_back(currProcess);
-            }else{
-                level4Q.push(currProcess);
-            }
+            levelRR(pList, n, ind, currTime, 10, level3Q, level4Q, level1Q, schedule);
         }
 
         if(!level4Q.empty() && level3Q.empty() && level2Q.empty() && level1Q.empty()){

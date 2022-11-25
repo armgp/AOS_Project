@@ -1,48 +1,48 @@
 pid: 3
 arrivalTime: 2
 burstTime: 0
-waitingTime: 2
-completionTime: 6
-turnAroundTime: 4
+waitingTime: 4
+completionTime: 8
+turnAroundTime: 6
 -------------------------------
 
 pid: 4
 arrivalTime: 3
 burstTime: 0
-waitingTime: 3
-completionTime: 7
-turnAroundTime: 4
--------------------------------
-
-pid: 1
-arrivalTime: 0
-burstTime: 0
-waitingTime: 9
-completionTime: 13
-turnAroundTime: 13
--------------------------------
-
-pid: 2
-arrivalTime: 1
-burstTime: 0
-waitingTime: 10
-completionTime: 16
-turnAroundTime: 15
--------------------------------
-
-pid: 5
-arrivalTime: 4
-burstTime: 0
-waitingTime: 10
-completionTime: 20
-turnAroundTime: 16
+waitingTime: 5
+completionTime: 9
+turnAroundTime: 6
 -------------------------------
 
 pid: 6
 arrivalTime: 6
 burstTime: 0
+waitingTime: 6
+completionTime: 15
+turnAroundTime: 9
+-------------------------------
+
+pid: 1
+arrivalTime: 0
+burstTime: 0
 waitingTime: 12
+completionTime: 16
+turnAroundTime: 16
+-------------------------------
+
+pid: 2
+arrivalTime: 1
+burstTime: 0
+waitingTime: 12
+completionTime: 18
+turnAroundTime: 17
+-------------------------------
+
+pid: 5
+arrivalTime: 4
+burstTime: 0
+waitingTime: 11
 completionTime: 21
-turnAroundTime: 15
+turnAroundTime: 17
 -------------------------------
 
