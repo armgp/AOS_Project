@@ -172,6 +172,8 @@ void rr(vector<Process>& pList, int tq){
             schedule.push_back(currProcess);
         }
     }
+
+    pList = schedule;
 }
 
 int main(){
