@@ -118,7 +118,7 @@ void sjfP(vector<Process>& pList){
         Process p = minHeap.top();
         minHeap.pop();
         p.burstTime--;
-        p.turnAroundTime--;
+        p.waitingTime--;
 
         if(p.burstTime > 0) minHeap.push(p);
         else{
@@ -138,6 +138,42 @@ void sjfP(vector<Process>& pList){
 
 }
 
+void rr(vector<Process>& pList, int tq){
+    sort(pList.begin(), pList.end(), [](Process &p1, Process &p2){
+        return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid<p2.pid));
+    });
+
+    queue<Process> q;
+    vector<Process> schedule;
+
+    for(Process p : pList) q.push(p);
+
+    int currTime = q.front().arrivalTime;
+    while(!q.empty()){
+        Process currProcess = q.front();
+        q.pop();
+        currTime = max(currTime, currProcess.arrivalTime);
+        if(tq <= currProcess.burstTime){
+            currProcess.burstTime-=tq;
+            currTime+=tq;
+            currProcess.waitingTime-=tq;
+        }else{
+            currTime+=currProcess.burstTime;
+            currProcess.waitingTime-=currProcess.burstTime;
+            currProcess.burstTime = 0;
+        }
+
+        if(currProcess.burstTime != 0){
+            q.push(currProcess);
+        }else{
+            currProcess.completionTime = currTime;
+            currProcess.turnAroundTime = currProcess.completionTime-currProcess.arrivalTime;
+            currProcess.waitingTime += currProcess.turnAroundTime;
+            schedule.push_back(currProcess);
+        }
+    }
+}
+
 int main(){
 
     int n;
@@ -155,6 +191,7 @@ int main(){
     // fcfs(processes);
     // sjfNP(processes);
     // sjfP(processes);
+    rr(processes, 2);
 
     for(Process p : processes) p.showPocess();
     
