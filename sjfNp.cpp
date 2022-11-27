@@ -2,12 +2,13 @@
 
 using namespace std;
 
-int id = 1;
+int id = 0;
 
 struct Process{
     int pid;
     int arrivalTime;
     int reEntryTime;
+    int bt;
     int burstTime1;
     int ioTime;
     int burstTime2;
@@ -24,6 +25,7 @@ struct Process{
         arrivalTime = 0;
         reEntryTime = 0;
         ioTime = 0;
+        bt = 0;
         burstTime2 = 0;
         waitingTime = 0;
         completionTime = 0;
@@ -40,6 +42,7 @@ struct Process{
         waitingTime = 0;
         completionTime = 0;
         turnAroundTime = 0;
+        bt = bt1+io+bt2;
 
         if(bt1 > 0) bt1Over = false;
         if(io > 0) ioOver = false;
@@ -65,65 +68,74 @@ struct compareReEntryTime{
     }
 };
 
-struct compareArrivalTime{
+struct compareBurstTime{
     bool operator()(Process &p1, Process &p2){
-        return (p1.arrivalTime>p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid>p2.pid));
+        return (p1.bt>p2.bt || (p1.bt==p2.bt && p1.pid>p2.pid));
     }
 };
 
-vector<Process> fcfs(vector<Process> newProcesses){
+vector<Process> sjfNp(vector<Process> newProcesses){
+
     sort(newProcesses.begin(), newProcesses.end(), [](Process &p1, Process &p2){
         return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid>p2.pid));
     });
 
-    priority_queue<Process, vector<Process>, compareArrivalTime> readyQueue;
+    priority_queue<Process, vector<Process>, compareBurstTime> readyQueue;
     priority_queue<Process, vector<Process>, compareReEntryTime> waitingQueue;
 
     vector<Process> schedule;
 
     int timer = 0;
-
-    //adding to ready queue
-    for(Process p : newProcesses) readyQueue.push(p);
+    int ind  = 0;
+    int n = newProcesses.size();
 
     while(true){
+        while(ind<n && newProcesses[ind].arrivalTime <= timer){
+            readyQueue.push(newProcesses[ind++]);
+        }
 
         if(!readyQueue.empty()){
             Process currProcess = readyQueue.top();
             readyQueue.pop();
 
-            //executing in cpu
-            if(!currProcess.bt1Over) {
+            if(!currProcess.bt1Over){
                 timer+=currProcess.burstTime1;
                 currProcess.bt1Over = true;
-                currProcess.reEntryTime = timer+currProcess.ioTime;
-                waitingQueue.push(currProcess);
+                currProcess.bt-=currProcess.burstTime1;
+                if(!currProcess.ioOver){
+                    currProcess.reEntryTime = timer+currProcess.ioTime;
+                    waitingQueue.push(currProcess);
+                }
             }
 
             else if(currProcess.bt1Over && currProcess.ioOver && !currProcess.bt2Over){
                 timer+=currProcess.burstTime2;
+                currProcess.bt-=currProcess.burstTime2;
                 currProcess.bt2Over = true;
-                currProcess.completionTime = timer;
-                currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
-                schedule.push_back(currProcess);
             }
 
+            if(currProcess.bt1Over && currProcess.ioOver && currProcess.bt2Over){
+                currProcess.completionTime = timer;
+                currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
+                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2);
+                schedule.push_back(currProcess);
+            }
         }
 
-        else if(readyQueue.empty() && !waitingQueue.empty()) timer++;
-
-        //ioprocess execution
         while(!waitingQueue.empty() && waitingQueue.top().reEntryTime <= timer){
-            Process ioCurrProcess = waitingQueue.top();
+            Process reEntryProcess = waitingQueue.top();
+            reEntryProcess.ioOver = true;
+            reEntryProcess.bt-=reEntryProcess.ioTime;
             waitingQueue.pop();
-            ioCurrProcess.ioOver = true;
-            readyQueue.push(ioCurrProcess);
+            readyQueue.push(reEntryProcess);
         }
+
+        if(readyQueue.empty() && !waitingQueue.empty()){
+            timer = waitingQueue.top().reEntryTime;
+        }
+
+        if(readyQueue.empty() && waitingQueue.empty() && ind>=n) break;
         
-
-        if(readyQueue.empty() && waitingQueue.empty()) break;
-
     }
 
     return schedule;
@@ -144,7 +156,7 @@ int main(){
         processes.push_back(p);
     }
 
-    vector<Process> schedule = fcfs(processes);
+    vector<Process> schedule = sjfNp(processes);
 
     for(Process p : schedule) p.showPocess();
     

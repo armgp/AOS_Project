@@ -1,30 +1,30 @@
-pid: 1
-arrivalTime: 0
-burstTime1: 6
-ioTime: 10
-burstTime2: 4
-waitingTime: 2
-completionTime: 22
-turnAroundTime: 22
--------------------------------
-
-pid: 3
+pid: 2
 arrivalTime: 0
 burstTime1: 3
 ioTime: 5
 burstTime2: 2
-waitingTime: 15
-completionTime: 25
-turnAroundTime: 25
+waitingTime: 6
+completionTime: 11
+turnAroundTime: 11
 -------------------------------
 
-pid: 2
+pid: 0
+arrivalTime: 0
+burstTime1: 6
+ioTime: 10
+burstTime2: 4
+waitingTime: 14
+completionTime: 24
+turnAroundTime: 24
+-------------------------------
+
+pid: 1
 arrivalTime: 0
 burstTime1: 9
 ioTime: 15
 burstTime2: 6
-waitingTime: 6
-completionTime: 36
-turnAroundTime: 36
+waitingTime: 26
+completionTime: 41
+turnAroundTime: 41
 -------------------------------
 
