@@ -15,6 +15,7 @@ struct Process{
     int waitingTime;
     int completionTime;
     int turnAroundTime;
+    int responseTime;
 
     bool bt1Over = true;
     bool ioOver = true;
@@ -30,6 +31,7 @@ struct Process{
         waitingTime = 0;
         completionTime = 0;
         turnAroundTime = 0;
+        responseTime = 0;
     }
 
     Process(int at, int bt1, int io, int bt2){
@@ -43,6 +45,7 @@ struct Process{
         completionTime = 0;
         turnAroundTime = 0;
         bt = bt1+io+bt2;
+        responseTime = 0;
 
         if(bt1 > 0) bt1Over = false;
         if(io > 0) ioOver = false;
@@ -58,6 +61,7 @@ struct Process{
         cout<<"waitingTime: "<<waitingTime<<"\n";
         cout<<"completionTime: "<<completionTime<<"\n";
         cout<<"turnAroundTime: "<<turnAroundTime<<"\n";
+        cout<<"responseTime: "<<responseTime<<"\n";
         cout<<"-------------------------------\n\n";
     }
 };
@@ -84,6 +88,7 @@ vector<Process> sjfP(vector<Process> newProcesses){
     priority_queue<Process, vector<Process>, compareReEntryTime> waitingQueue;
 
     vector<Process> schedule;
+    unordered_map<int, int> m;
 
     int timer = 0;
     int ind  = 0;
@@ -101,6 +106,10 @@ vector<Process> sjfP(vector<Process> newProcesses){
 
             if(!currProcess.bt1Over){
                 timer++;
+                if(m.find(currProcess.pid) == m.end()){
+                    m[currProcess.pid] == 1;
+                    currProcess.responseTime = timer-currProcess.arrivalTime;
+                }
                 if(currProcess.bt > currProcess.ioTime+currProcess.burstTime2){
                     currProcess.bt--;
                     if(currProcess.bt == currProcess.ioTime+currProcess.burstTime2){

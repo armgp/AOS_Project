@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int id = 0;
+int id = 1;
 
 struct Process{
     int pid;
@@ -15,6 +15,8 @@ struct Process{
     int waitingTime;
     int completionTime;
     int turnAroundTime;
+    int usedArrTime;
+    int responseTime;
 
     bool bt1Over = true;
     bool ioOver = true;
@@ -30,11 +32,14 @@ struct Process{
         waitingTime = 0;
         completionTime = 0;
         turnAroundTime = 0;
+        usedArrTime = 0;
+        responseTime = 0;
     }
 
     Process(int at, int bt1, int io, int bt2){
         pid = id++;
         arrivalTime = at;
+        usedArrTime = at;
         reEntryTime = 0;
         burstTime1 = bt1;
         ioTime = io;
@@ -42,6 +47,7 @@ struct Process{
         waitingTime = 0;
         completionTime = 0;
         turnAroundTime = 0;
+        responseTime = 0;
         bt = bt1+io+bt2;
 
         if(bt1 > 0) bt1Over = false;
@@ -58,6 +64,7 @@ struct Process{
         cout<<"waitingTime: "<<waitingTime<<"\n";
         cout<<"completionTime: "<<completionTime<<"\n";
         cout<<"turnAroundTime: "<<turnAroundTime<<"\n";
+        cout<<"responseTime: "<<responseTime<<"\n";
         cout<<"-------------------------------\n\n";
     }
 };
@@ -70,29 +77,32 @@ struct compareReEntryTime{
 
 struct compareArrivalTime{
     bool operator()(Process &p1, Process &p2){
-        return (p1.arrivalTime>p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid>p2.pid));
+        return (p1.usedArrTime>p2.usedArrTime || (p1.usedArrTime==p2.usedArrTime && p1.pid>p2.pid));
     }
 };
 
-struct compareBurstTime{
-    bool operator()(Process &p1, Process &p2){
-        return (p1.bt>p2.bt || (p1.bt==p2.bt && p1.pid>p2.pid));
-    }
-};
+vector<Process> rr(vector<Process> newProcesses, int tq){
 
-vector<Process> fcfs(vector<Process> newProcesses){
+    sort(newProcesses.begin(), newProcesses.end(), [](Process &p1, Process &p2){
+        return (p1.arrivalTime<p2.arrivalTime || (p1.arrivalTime==p2.arrivalTime && p1.pid>p2.pid));
+    });
 
     priority_queue<Process, vector<Process>, compareArrivalTime> readyQueue;
     priority_queue<Process, vector<Process>, compareReEntryTime> waitingQueue;
 
     vector<Process> schedule;
+    unordered_map<int, int> m;
+    unordered_map<int, int> pushed;
 
     int timer = 0;
-
-    //adding to ready queue
-    for(Process p : newProcesses) readyQueue.push(p);
+    int ind = 0;
+    int n = newProcesses.size();
 
     while(true){
+
+        while(ind<n && newProcesses[ind].arrivalTime <= timer){
+            readyQueue.push(newProcesses[ind++]);
+        }
 
         if(!readyQueue.empty()){
             Process currProcess = readyQueue.top();
@@ -100,26 +110,61 @@ vector<Process> fcfs(vector<Process> newProcesses){
 
             //executing in cpu
             if(!currProcess.bt1Over) {
-                timer+=currProcess.burstTime1;
-                currProcess.bt1Over = true;
-                currProcess.reEntryTime = timer+currProcess.ioTime;
-                waitingQueue.push(currProcess);
+                if(m.find(currProcess.pid) == m.end()){
+                    m[currProcess.pid] == 1;
+                    currProcess.responseTime = timer-currProcess.arrivalTime;
+                }
+                
+                int bt1remaining = currProcess.bt-(currProcess.ioTime + currProcess.burstTime2);
+                if(tq <= bt1remaining){
+                    currProcess.bt-=tq;
+                    timer+=tq;
+                }else{
+                    currProcess.bt-=bt1remaining;
+                    timer+=bt1remaining;
+                }
+                
+                if(currProcess.bt == currProcess.ioTime+currProcess.burstTime2){
+                    currProcess.bt1Over = true;
+                    if(!currProcess.ioOver){
+                        currProcess.reEntryTime = timer+currProcess.ioTime;
+                        waitingQueue.push(currProcess);
+                    }
+                }else{
+                    currProcess.usedArrTime = timer;
+                    readyQueue.push(currProcess);
+                }
+
             }
 
             else if(currProcess.bt1Over && currProcess.ioOver && !currProcess.bt2Over){
-                timer+=currProcess.burstTime2;
-                currProcess.bt2Over = true;
-                currProcess.completionTime = timer;
-                currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
-                schedule.push_back(currProcess);
+                if(tq <= currProcess.bt){
+                    currProcess.bt-=tq;
+                    timer+=tq;
+                }else{
+                    timer+=currProcess.bt;
+                    currProcess.bt=0;
+                }
+
+                if(currProcess.bt == 0){
+                    currProcess.bt2Over = true;
+                    currProcess.completionTime = timer;
+                    currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
+                    currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2);
+                    schedule.push_back(currProcess);
+                    pushed[currProcess.pid] = 1;
+                }else{
+                    currProcess.usedArrTime = timer;
+                    readyQueue.push(currProcess);
+                }
             }
 
-            else if(currProcess.bt1Over && currProcess.ioOver && currProcess.bt2Over){
+            if(currProcess.bt1Over && currProcess.ioOver && currProcess.bt2Over && pushed.find(currProcess.pid)==pushed.end()){
                 currProcess.completionTime = timer;
                 currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
+                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 );
                 schedule.push_back(currProcess);
+                pushed[currProcess.pid] = 1;
             }
 
         }
@@ -131,9 +176,12 @@ vector<Process> fcfs(vector<Process> newProcesses){
             Process ioCurrProcess = waitingQueue.top();
             waitingQueue.pop();
             ioCurrProcess.ioOver = true;
+            ioCurrProcess.usedArrTime = ioCurrProcess.reEntryTime;
+            ioCurrProcess.bt-=ioCurrProcess.ioTime;
             readyQueue.push(ioCurrProcess);
         }
-        
+
+        if(readyQueue.empty() && waitingQueue.empty() && ind<n) timer = newProcesses[ind].arrivalTime;
 
         if(readyQueue.empty() && waitingQueue.empty()) break;
 
@@ -157,7 +205,7 @@ int main(){
         processes.push_back(p);
     }
 
-    vector<Process> schedule = fcfs(processes);
+    vector<Process> schedule = rr(processes, 3);
 
     for(Process p : schedule) p.showPocess();
     
