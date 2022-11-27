@@ -3,9 +3,9 @@ arrivalTime: 0
 burstTime1: 5
 ioTime: 1
 burstTime2: 0
-waitingTime: 10
-completionTime: 15
-turnAroundTime: 15
+waitingTime: 9
+completionTime: 14
+turnAroundTime: 14
 responseTime: 0
 -------------------------------
 
@@ -14,10 +14,10 @@ arrivalTime: 1
 burstTime1: 4
 ioTime: 3
 burstTime2: 3
-waitingTime: 10
-completionTime: 18
-turnAroundTime: 17
-responseTime: 2
+waitingTime: 13
+completionTime: 21
+turnAroundTime: 20
+responseTime: 1
 -------------------------------
 
 pid: 4

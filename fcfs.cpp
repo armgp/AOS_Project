@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int id = 0;
+int id = 1;
 
 struct Process{
     int pid;
