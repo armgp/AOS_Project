@@ -184,15 +184,49 @@ vector<Process> get_processes()
 
 int main(){
 
-
-
     vector<Process> processes;
 
     processes = get_processes();
 
-    vector<Process> schedule = fcfs(processes);
+    int nop = processes.size();
+    ofstream file("fcfs.csv");
+    ofstream file1("data.csv");
+    map<int,vector<int>>m;
 
-    for(Process p : schedule) p.showPocess();
+    vector<Process> schedule = fcfs(processes);
+    int avg_waitingtime = 0;
+    int avg_completiontime = 0;
+    int avg_turnaroundtime = 0;
+    int avg_responsetime = 0;
     
+    for(Process p : schedule){
+    
+        p.showPocess();
+        vector<int>v;
+        v.push_back(p.pid);
+        avg_waitingtime+=p.waitingTime;
+        v.push_back(p.waitingTime);
+        avg_completiontime+=p.completionTime;
+        v.push_back(p.completionTime);
+        avg_turnaroundtime+=p.turnAroundTime;
+        v.push_back(p.turnAroundTime);
+        avg_responsetime+=p.responseTime;
+        v.push_back(p.responseTime);
+        m[p.pid] = v;
+        v.clear();
+    }
+    avg_waitingtime = avg_waitingtime/nop;
+    avg_completiontime = avg_completiontime/nop;
+    avg_turnaroundtime = avg_turnaroundtime/nop;
+    avg_responsetime = avg_responsetime/nop;
+    file1<<avg_waitingtime<<"  "<<avg_completiontime<<"  "<<avg_turnaroundtime<<"  "<<avg_responsetime<<"  "<<"\n";
+    //cout<<avg_waitingtime<<endl;
+    for (auto i = m.begin(); i!= m.end(); i++)
+    {
+        //cout << i->first<< " : ";
+        for(int j=0;j<i->second.size();j++)
+                  file<< i->second[j] <<"  ";
+        file<<"\n";
+    }
     return 0;
 }
