@@ -92,10 +92,10 @@ vector<Process> fcfs(vector<Process> newProcesses){
     vector<Process> schedule;
     unordered_map<int, int> m;
 
-    int timer = 0;
-
     //adding to ready queue
     for(Process p : newProcesses) readyQueue.push(p);
+
+    int timer = readyQueue.top().arrivalTime;
 
     while(true){
 

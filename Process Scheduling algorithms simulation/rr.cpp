@@ -150,7 +150,7 @@ vector<Process> rr(vector<Process> newProcesses, int tq){
                     currProcess.bt2Over = true;
                     currProcess.completionTime = timer;
                     currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                    currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2);
+                    currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
                     schedule.push_back(currProcess);
                     pushed[currProcess.pid] = 1;
                 }else{
@@ -162,7 +162,7 @@ vector<Process> rr(vector<Process> newProcesses, int tq){
             if(currProcess.bt1Over && currProcess.ioOver && currProcess.bt2Over && pushed.find(currProcess.pid)==pushed.end()){
                 currProcess.completionTime = timer;
                 currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 );
+                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
                 schedule.push_back(currProcess);
                 pushed[currProcess.pid] = 1;
             }

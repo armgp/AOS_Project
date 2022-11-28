@@ -189,7 +189,9 @@ vector<Process> priorityP(vector<Process> newProcesses){
         }
         
 
-        if(readyQueue.empty() && waitingQueue.empty()) break;
+        if(readyQueue.empty() && waitingQueue.empty() && ind>=size) break;
+
+        if(readyQueue.empty() && waitingQueue.empty() && ind<size) timer++;
 
     }
 

@@ -141,7 +141,7 @@ vector<Process> sjfP(vector<Process> newProcesses){
             if(currProcess.bt1Over && currProcess.ioOver && currProcess.bt2Over){
                 currProcess.completionTime = timer;
                 currProcess.turnAroundTime = currProcess.completionTime - currProcess.arrivalTime;
-                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2);
+                currProcess.waitingTime = currProcess.turnAroundTime - (currProcess.burstTime1 + currProcess.burstTime2 + currProcess.ioTime);
                 schedule.push_back(currProcess);
             }
         }
