@@ -183,7 +183,7 @@ vector<Process> rr(vector<Process> newProcesses, int tq){
 
         if(readyQueue.empty() && waitingQueue.empty() && ind<n) timer = newProcesses[ind].arrivalTime;
 
-        if(readyQueue.empty() && waitingQueue.empty()) break;
+        if(readyQueue.empty() && waitingQueue.empty() && ind>=n) break;
 
     }
 
