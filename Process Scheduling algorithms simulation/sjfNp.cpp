@@ -74,7 +74,9 @@ struct compareReEntryTime{
 
 struct compareBurstTime{
     bool operator()(Process &p1, Process &p2){
-        return (p1.bt>p2.bt || (p1.bt==p2.bt && p1.pid>p2.pid));
+        int p1bt = p1.burstTime1+p1.burstTime2;
+        int p2bt = p2.burstTime1+p2.burstTime2;
+        return (p1bt>p2bt || (p1bt==p2bt && p1.pid>p2.pid));
     }
 };
 
