@@ -176,23 +176,47 @@ vector<Process> priorityNP(vector<Process> newProcesses){
     return schedule;
 }
 
+vector<Process> get_processes()
+{
+
+	// File pointer
+	fstream fin;
+
+	// Open an existing file
+    vector<Process> Input_process;
+	fin.open("processes.csv", ios::in);
+
+
+	string line, word;
+
+	while (getline(fin, line)) {
+        vector<int> cur_process;
+		stringstream s(line);
+
+		while (getline(s, word, ',')) {
+            cur_process.push_back(stoi(word));
+		}
+        Process p(cur_process[0], cur_process[1], cur_process[2], cur_process[3],cur_process[4]);
+        Input_process.push_back(p);
+
+	}
+    return Input_process;
+
+   
+}
+
+
 int main(){
 
-    int n;
-    cin>>n;
+
 
     vector<Process> processes;
 
-    while(n--){
-        int at, bt1, io, bt2, pt;
-        cin>>at>>bt1>>io>>bt2>>pt;
-        Process p(at, bt1, io, bt2, pt);
-        processes.push_back(p);
-    }
+    processes = get_processes();
 
-    // vector<Process> schedule = priorityNP(processes);
+    vector<Process> schedule = priorityNP(processes);
 
-    for(Process p : processes) p.showPocess();
+    for(Process p : schedule) p.showPocess();
     
     return 0;
 }
