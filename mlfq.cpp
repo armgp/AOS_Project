@@ -161,7 +161,7 @@ vector<Process> mlfq(vector<Process> newProcesses){
                     currProcess.bt2Over = true;
                 }else{
                     currProcess.usedArrTime = timer;
-                    readyQueue2.push(currProcess);
+                    readyQueue3.push(currProcess);
                 }
             }
 
@@ -251,7 +251,7 @@ vector<Process> mlfq(vector<Process> newProcesses){
             }
         }
 
-        if(readyQueue1.empty() && readyQueue2.empty() && readyQueue3.empty() && waitingQueue.empty()){
+        if(readyQueue1.empty() && readyQueue2.empty() && readyQueue3.empty() && waitingQueue.empty() && ind>=n){
             break;
         }
 
